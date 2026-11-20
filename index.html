@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbdce9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2b1420" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<title>Le matin</title>
+<style>
+:root{
+  --bg:#fbdce9; --card:#fff9fb; --ink:#3b1e2c; --mute:#8a5d72; --line:#f1c4d6;
+  --accent:#d0407a; --rain:#3a78c2; --warn:#b5651d; --bad:#b8283f; --ok:#2f7d4f;
+  --band:rgba(208,64,122,.16); --night:rgba(120,30,70,.06);
+  --bun:#ffffff; --bun-line:#e3a2bd; --bun-in:#f7a6c4; --bun-eye:#3b1e2c; --shadow:rgba(150,40,90,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#2b1420;--card:#3b1d2c;--ink:#fbe9f1;--mute:#caa0b4;--line:#5a2f43;
+  --accent:#ff8fbb;--rain:#7fb0f0;--warn:#e0a060;--bad:#f08a98;--ok:#6cc08f;
+  --band:rgba(255,143,187,.18);--night:rgba(255,255,255,.04);
+  --bun:#fff4f8;--bun-line:#d58fae;--bun-in:#f59ac0;--bun-eye:#3b1e2c;--shadow:rgba(0,0,0,.35)}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 10px);
+  display:flex;flex-direction:column;gap:8px;min-height:100svh}
+header{display:flex;align-items:baseline;justify-content:space-between;padding:0 4px}
+header .d{font-size:15px;font-weight:600}
+header .now{font-variant-numeric:tabular-nums;font-size:20px;font-weight:650}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.row{display:flex;align-items:center;gap:8px}
+.lab{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);font-weight:600;white-space:nowrap}
+.sub{color:var(--mute);font-size:13px}
+button{font:inherit;color:inherit}
+.seg{display:flex;background:var(--bg);border-radius:8px;padding:2px;gap:2px;margin-left:auto}
+.seg button{border:0;background:transparent;padding:3px 9px;border-radius:6px;font-size:13px;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.iconbtn{border:0;background:transparent;font-size:16px;padding:0 2px;color:var(--mute);cursor:pointer}
+.go{border-radius:10px;padding:6px 10px;margin:8px 0 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.go b{font-size:17px}
+.go span{font-size:12px;opacity:.85;text-align:right}
+.go.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.go.hurry{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.go.late{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.carousel{display:flex;align-items:center;gap:2px}
+.arrow{border:0;background:transparent;color:var(--accent);font-size:26px;line-height:1;width:22px;flex:0 0 22px;padding:0;cursor:pointer}
+.arrow:disabled{color:var(--line);cursor:default}
+.buses{flex:1;min-width:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.buses::-webkit-scrollbar{display:none}
+.bus{flex:0 0 33.333%;scroll-snap-align:start;text-align:center;padding:4px 2px;border-radius:10px;font-variant-numeric:tabular-nums;cursor:pointer;border:1.5px solid transparent}
+.bus.sel{border-color:var(--accent)}
+.dots{display:flex;justify-content:center;gap:5px;margin-top:4px;height:5px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent)}
+.bus .h{font-size:22px;font-weight:650;line-height:1.15}
+.bus .in{font-size:13px;font-weight:600}
+.bus .a{font-size:11px;color:var(--mute)}
+.bus.missed{opacity:.45}
+.bus .in.soon{color:var(--accent)}
+.recap{display:flex;align-items:center;gap:10px;margin-top:4px}
+.umb{position:relative;font-size:38px;line-height:1;width:46px;text-align:center;flex:0 0 46px}
+.umb.no::after{content:"";position:absolute;left:3px;right:3px;top:50%;height:4px;background:var(--bad);border-radius:2px;transform:rotate(-38deg);box-shadow:0 0 0 2px var(--card)}
+.big{font-size:34px;font-weight:650;line-height:1;letter-spacing:-.02em}
+.verdict{font-weight:650;font-size:15px}
+.why{color:var(--mute);font-size:12.5px;margin-top:4px}
+.why b{color:var(--rain);font-weight:600}
+.chart{width:100%;height:auto;display:block;margin-top:2px}
+.chart text{fill:var(--mute);font-size:10px}
+.chart .tl{fill:var(--ink);font-size:10.5px;font-weight:600}
+.chart .em{font-size:12px}
+ul.tips{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+ul.tips li{display:flex;gap:6px;align-items:center;font-size:13px;line-height:1.2;min-height:26px}
+ul.tips li.w{grid-column:1/-1}
+ul.tips .i{font-size:17px;width:20px;text-align:center;flex:0 0 20px}
+.foot{color:var(--mute);font-size:11px;text-align:center;margin-top:auto;padding-top:2px}
+.foot a{color:var(--mute)}
+.settings{display:none;background:var(--bg);border-radius:10px;padding:6px 10px;margin-top:8px;font-size:13px}
+.settings.open{display:block}
+.settings label{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:10px}
+.settings input{width:60px;font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);text-align:right}
+.skel{color:var(--mute);font-size:13px;padding:6px 0}
+.err{color:var(--bad);font-size:13px}
+
+/* ---------- lapin ---------- */
+.garden{flex:1 1 auto;min-height:126px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px}
+.bunny{width:140px;height:auto;overflow:visible;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bunny .hopper{animation:hop 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.bunny.boing .hopper{animation:boing .7s cubic-bezier(.3,.7,.4,1) 1}
+.bunny .shade{fill:var(--shadow);transform-box:fill-box;transform-origin:center;animation:shade 3.2s ease-in-out infinite}
+.bunny.boing .shade{animation:shadeBoing .7s ease-out 1}
+.bunny .fur{fill:var(--bun);stroke:var(--bun-line);stroke-width:1.6;stroke-linejoin:round}
+.bunny .inner{fill:var(--bun-in)}
+.bunny .cheek{fill:var(--bun-in);opacity:.55}
+.bunny .eye{fill:var(--bun-eye);transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+.bunny .mouth{fill:none;stroke:var(--bun-eye);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.bunny .ear{transform-box:fill-box;transform-origin:50% 100%}
+.bunny .earL{animation:earL 3.2s ease-in-out infinite}
+.bunny .earR{animation:earR 3.2s ease-in-out infinite}
+.bunny .heart{fill:var(--accent);opacity:0;transform-box:fill-box;transform-origin:center}
+.bunny.boing .heart{animation:heart .9s ease-out 1}
+@keyframes hop{
+  0%,52%{transform:translateY(0) scale(1,1)}
+  60%{transform:translateY(0) scale(1.06,.92)}
+  72%{transform:translateY(-20px) scale(.97,1.05)}
+  84%{transform:translateY(0) scale(1.06,.92)}
+  90%{transform:translateY(0) scale(.99,1.02)}
+  100%{transform:translateY(0) scale(1,1)}
+}
+@keyframes shade{
+  0%,52%{transform:scale(1)} 72%{transform:scale(.68);opacity:.6} 84%,100%{transform:scale(1);opacity:1}
+}
+@keyframes boing{
+  0%{transform:translateY(0) scale(1.1,.88)} 35%{transform:translateY(-34px) scale(.95,1.08)}
+  70%{transform:translateY(0) scale(1.08,.9)} 100%{transform:translateY(0) scale(1,1)}
+}
+@keyframes shadeBoing{0%,70%,100%{transform:scale(1)} 35%{transform:scale(.55);opacity:.5}}
+@keyframes earL{0%,50%,100%{transform:rotate(0)} 60%{transform:rotate(7deg)} 72%{transform:rotate(-9deg)} 86%{transform:rotate(4deg)}}
+@keyframes earR{0%,50%,100%{transform:rotate(0)} 60%{transform:rotate(-7deg)} 72%{transform:rotate(9deg)} 86%{transform:rotate(-4deg)}}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)} 96%{transform:scaleY(.08)}}
+@keyframes heart{0%{opacity:0;transform:translateY(6px) scale(.5)} 25%{opacity:1} 100%{opacity:0;transform:translateY(-26px) scale(1.1)}}
+.bunny [data-a]{display:none}
+.bunny .hat{fill:#5aa0f0}.bunny .hat2{fill:#fff4f8;stroke:var(--bun-line);stroke-width:1}
+.bunny.sleep .hat{fill:#8e7cf0}.bunny.sleep .eye{display:none}
+.bunny.calm .hopper,.bunny.sleep .hopper{animation:breathe 4s ease-in-out infinite}
+.bunny.calm .ear,.bunny.sleep .ear,.bunny.calm .shade,.bunny.sleep .shade{animation:none}
+.bunny.cold .hopper{animation:shiver .22s linear infinite}
+.f-rain{stroke:var(--rain);stroke-width:1.4;stroke-linecap:round;animation:fall linear infinite}
+.f-snow{fill:#fff;stroke:var(--bun-line);stroke-width:.6;animation:fall linear infinite}
+.f-zzz{fill:var(--accent);font:700 12px sans-serif;opacity:0;animation:zz 3.2s ease-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.015,1.03)}}
+@keyframes shiver{0%,100%{transform:translateX(-.8px)}50%{transform:translateX(.8px)}}
+@keyframes fall{0%{transform:translateY(0);opacity:0}10%,90%{opacity:.9}100%{transform:translateY(145px);opacity:0}}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(10px,-24px)}}
+@media (prefers-reduced-motion: reduce){
+  .fx *,.bunny .hopper,.bunny .shade,.bunny .eye,.bunny .ear{animation:none!important}
+}
+</style>
+</head>
+<body>
+<main>
+  <header><div class="d" id="date"></div><div class="now" id="clock">--:--</div></header>
+
+  <section class="card">
+    <div class="row">
+      <span class="lab">230 · Viridis</span>
+      <div class="seg"><button id="tAller" class="on">Aller</button><button id="tRetour">Retour</button></div>
+      <button class="iconbtn" id="gear" aria-label="Réglages">⚙︎</button>
+    </div>
+    <div class="settings" id="settings">
+      <label>Marche jusqu'à l'arrêt (min) <input id="walk" type="number" min="0" max="30" inputmode="numeric"></label>
+      <label>Marge de sécurité (min) <input id="margin" type="number" min="0" max="15" inputmode="numeric"></label>
+    </div>
+    <div id="go"></div>
+    <div class="carousel">
+      <button class="arrow" id="prev" aria-label="Bus précédents">‹</button>
+      <div class="buses" id="buses"><div class="skel">Chargement…</div></div>
+      <button class="arrow" id="next" aria-label="Bus suivants">›</button>
+    </div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><span class="lab" id="wxTitle">Météo du jour</span><span class="sub" id="wxAge" style="margin-left:auto;font-size:11px"></span></div>
+    <div id="recap"><div class="skel">Interrogation des modèles…</div></div>
+    <div id="timeline"></div>
+  </section>
+
+  <section class="card" id="tipsCard" hidden>
+    <ul class="tips" id="tips"></ul>
+  </section>
+
+  <div class="garden">
+    <svg class="bunny" id="bunny" viewBox="-20 -12 160 138" role="img" aria-label="Le lapin du jour">
+      <defs><pattern id="stripe" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="7" height="14" fill="#ff8fb8"/><rect x="7" width="7" height="14" fill="#fff"/></pattern></defs>
+      <ellipse class="shade" cx="60" cy="118" rx="32" ry="5"/>
+      <g data-a="chair"><rect x="20" y="52" width="80" height="62" rx="9" fill="url(#stripe)" stroke="var(--bun-line)" stroke-width="1.6"/><path d="M26 112 L14 124 M94 112 L106 124" stroke="#b07a8c" stroke-width="3" stroke-linecap="round"/><path d="M104 86 h13 l-3 15 h-7z" fill="#7be0c3" stroke="var(--bun-line)"/><path d="M110 92 L113 78" stroke="#ff6fa3" stroke-width="1.8" stroke-linecap="round"/></g>
+      <g class="hopper">
+        <g data-a="umbrella"><path d="M54 24 Q96 -14 138 24 Q127 18 117 24 Q106 18 96 24 Q86 18 75 24 Q64 18 54 24Z" fill="#ff6fa3" stroke="#d0407a" stroke-width="1.4" stroke-linejoin="round"/><path d="M96 24 V100 q0 7 -6 7" fill="none" stroke="#8a5d72" stroke-width="2.4" stroke-linecap="round"/></g>
+        <g class="ear earL"><ellipse class="fur" cx="44" cy="30" rx="10.5" ry="27" transform="rotate(-9 44 30)"/><ellipse class="inner" cx="44" cy="32" rx="5" ry="19" transform="rotate(-9 44 32)"/></g>
+        <g class="ear earR"><ellipse class="fur" cx="76" cy="30" rx="10.5" ry="27" transform="rotate(9 76 30)"/><ellipse class="inner" cx="76" cy="32" rx="5" ry="19" transform="rotate(9 76 32)"/></g>
+        <ellipse class="fur" cx="60" cy="96" rx="29" ry="22"/>
+        <ellipse class="fur" cx="41" cy="114" rx="12" ry="6"/>
+        <ellipse class="fur" cx="79" cy="114" rx="12" ry="6"/>
+        <ellipse class="fur" cx="51" cy="100" rx="6" ry="9"/>
+        <ellipse class="fur" cx="69" cy="100" rx="6" ry="9"/>
+        <ellipse data-a="poncho" cx="60" cy="66" rx="34" ry="29" fill="#ffd23f" stroke="#e0a800" stroke-width="1.6"/>
+        <ellipse class="fur" cx="60" cy="64" rx="27" ry="23"/>
+        <ellipse class="cheek" cx="41" cy="71" rx="6" ry="4"/>
+        <ellipse class="cheek" cx="79" cy="71" rx="6" ry="4"/>
+        <ellipse class="eye" cx="49" cy="62" rx="3.2" ry="3.8"/>
+        <ellipse class="eye" cx="71" cy="62" rx="3.2" ry="3.8"/>
+        <path data-a="shut" class="mouth" d="M44 62 q5 4 10 0 M66 62 q5 4 10 0"/>
+        <ellipse class="inner" cx="60" cy="68" rx="3.4" ry="2.4"/>
+        <path class="mouth" d="M60 70.5 V73 M60 73 Q56.5 77 53.5 73.5 M60 73 Q63.5 77 66.5 73.5"/>
+        <g data-a="scarf" fill="#ef5b6e" stroke="#c53d50" stroke-width="1.2"><path d="M36 82 Q60 96 84 82 L86 91 Q60 105 34 91Z"/><rect x="70" y="90" width="10" height="20" rx="4"/></g>
+        <g data-a="poncho" fill="#ffd23f" stroke="#e0a800" stroke-width="1.6" stroke-linejoin="round"><path d="M32 86 Q60 100 88 86 L102 114 Q60 126 18 114Z"/><path d="M60 98 V120" fill="none" stroke-width="1.2"/></g>
+        <g data-a="beanie"><path class="hat" d="M34 50 Q36 24 60 24 Q84 24 86 50Z"/><rect class="hat2" x="32" y="47" width="56" height="9" rx="4.5"/><circle class="hat2" cx="60" cy="21" r="5.5"/></g>
+        <g data-a="shades" fill="#2a2030"><rect x="41" y="57" width="16" height="10" rx="4.5"/><rect x="63" y="57" width="16" height="10" rx="4.5"/><path d="M57 60 H63" stroke="#2a2030" stroke-width="2"/><path d="M44 60 h4 M66 60 h4" stroke="#fff" stroke-width="1.3" opacity=".5" stroke-linecap="round"/></g>
+        <ellipse data-a="umbrella" class="fur" cx="90" cy="99" rx="7" ry="5"/>
+        <path class="heart" d="M60 22 c-4-5-11-1-7 5 l7 7 l7-7 c4-6-3-10-7-5z" transform="translate(0 -8)"/>
+      </g>
+      <g class="fx" id="fx"></g>
+    </svg>
+  </div>
+
+  <div class="foot">
+    Horaires théoriques Fluo 67 · <a href="https://www.fluo.eu/fr/actualites/info-trafic" rel="noopener">info trafic</a> ·
+    <a href="https://vigilance.meteofrance.fr/fr/bas-rhin" rel="noopener">vigilance</a> · Open-Meteo<span id="ggSrc"></span><span id="busGen"></span>
+  </div>
+</main>
+
+<script>
+"use strict";
+const CFG = {
+  lieux: [
+    { nom: "Furdenheim", lat: 48.6200, lon: 7.6000 },
+    { nom: "Strasbourg", lat: 48.5734, lon: 7.7521 }
+  ],
+  modeles: ["meteofrance_seamless", "ecmwf_ifs025", "icon_seamless", "gfs_seamless", "meteoswiss_icon_seamless"],
+  noms: { meteofrance_seamless: "Météo-France", ecmwf_ifs025: "ECMWF", icon_seamless: "ICON",
+          gfs_seamless: "GFS", meteoswiss_icon_seamless: "MeteoSuisse", best_match: "Open-Meteo", google: "Google" },
+  seuilPluie: 0.2,    // mm/h, au-dessus : parapluie
+  seuilProba: 50,     // %, quand le modèle la fournit
+  seuilRafales: 50,   // km/h, parapluie peu utile
+  heureDebut: 6, heureFin: 23,
+  bascule: 19,        // après 19 h, météo du lendemain
+  maxConseils: 6,
+  fenetreBus: 90,       // min de bus affichés après le 3e départ
+  // Clé Google Maps Platform (Weather API). Vide = Google ignoré.
+  // Restreins-la à ton site GitHub Pages dans la console Google Cloud.
+  googleKey: "",
+  googleCacheMin: 20,   // on ne rappelle Google que toutes les 20 min (quota gratuit)
+  // seuils pollen (grains/m³) à partir desquels on prévient
+  pollens: { grass_pollen: [30, "graminées"], birch_pollen: [50, "bouleau"], alder_pollen: [50, "aulne"],
+             mugwort_pollen: [30, "armoise"], ragweed_pollen: [20, "ambroisie"], olive_pollen: [50, "olivier"] }
+};
+
+// ---------- utilitaires ----------
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const toMin = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+const r0 = x => Math.round(x);
+const fr1 = x => (Math.round(x * 10) / 10).toLocaleString("fr-FR");
+const hfr = s => s ? s.slice(11, 16).replace(":", "h") : "?";
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+const JC = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+function wxEmoji(code, nuit) {
+  if (code == null) return "";
+  if (code === 0) return nuit ? "🌙" : "☀️";
+  if (code === 1) return nuit ? "🌙" : "🌤️";
+  if (code === 2) return nuit ? "☁️" : "⛅";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if (code >= 51 && code <= 57) return "🌦️";
+  if (code >= 61 && code <= 67) return "🌧️";
+  if (code >= 71 && code <= 77) return "🌨️";
+  if (code >= 80 && code <= 82) return "🌧️";
+  if (code === 85 || code === 86) return "🌨️";
+  if (code >= 95) return "⛈️";
+  return "☁️";
+}
+
+function tickClock() {
+  const d = new Date();
+  $("clock").textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  $("date").textContent = `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
+}
+
+// ---------- bus ----------
+let BUS = null, sens = new Date().getHours() >= 14 ? "retour" : "aller", cible = null;
+const reglages = { walk: store.get("walk", 6), margin: store.get("margin", 2) };
+
+async function loadBus() {
+  try {
+    const r = await fetch("bus.json?v=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    BUS = await r.json();
+    store.set("busCache", BUS);
+  } catch (e) { BUS = store.get("busCache", null); }
+  if (BUS && BUS.genere) { const g = new Date(BUS.genere); $("busGen").textContent = ` · horaires du ${g.getDate()}/${pad(g.getMonth() + 1)}`; }
+  renderBus();
+}
+
+function prochains(kind, n) {
+  const out = [], now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+  for (let k = 0; k < 7 && out.length < n; k++) {
+    const d = new Date(now); d.setDate(d.getDate() + k);
+    const jour = BUS.jours[iso(d)];
+    if (!jour) continue;
+    for (const [dep, arr, lieu] of jour[kind]) {
+      const m = toMin(dep) + k * 1440;
+      if (m >= nowMin) out.push({ dep, arr, lieu, m, k });
+      if (out.length >= n) break;
+    }
+  }
+  return { list: out, nowMin };
+}
+
+function renderBus() {
+  $("tAller").classList.toggle("on", sens === "aller");
+  $("tRetour").classList.toggle("on", sens === "retour");
+  const box = $("buses"), go = $("go");
+  if (!BUS) { go.className = ""; go.innerHTML = ""; box.innerHTML = `<div class="err" style="grid-column:1/-1">Horaires indisponibles, lance le workflow « Horaires bus 230 » sur GitHub.</div>`; return; }
+  const { list, nowMin } = prochains(sens, 30);
+  if (!list.length) { go.className = ""; go.innerHTML = ""; box.innerHTML = `<div class="skel" style="grid-column:1/-1">Aucun passage dans les 7 prochains jours.</div>`; return; }
+  const lead = reglages.walk + reglages.margin;
+  const ok = list.filter(b => sens === "retour" || b.m - nowMin >= lead);
+  const juste = sens === "aller" ? list.filter(b => b.m - nowMin < lead).slice(-1) : [];
+  // les 3 prochains, puis tous ceux qui partent jusqu'à 1 h 30 après le 3e (12 au plus)
+  const fenetre = ok.length ? ok[Math.min(2, ok.length - 1)].m + CFG.fenetreBus : 0;
+  const shown = juste.concat(ok.filter((b, i) => i < 3 || b.m <= fenetre)).slice(0, 12);
+  if (cible != null && !ok.some(b => b.m === cible)) cible = null;
+  const first = (cible != null && ok.find(b => b.m === cible)) || ok[0] || null;
+  const keepScroll = box.scrollLeft;
+
+  box.innerHTML = shown.map(b => {
+    const delta = b.m - nowMin, missed = juste.includes(b);
+    const quand = b.k === 0 ? "" : b.k === 1 ? "demain " : JC[(new Date().getDay() + b.k) % 7] + " ";
+    const inTxt = missed ? "trop juste" : quand ? quand.trim() : delta < 60 ? `dans ${delta} min` : `dans ${Math.floor(delta / 60)} h ${pad(delta % 60)}`;
+    const a = sens === "aller" ? `arr. ${b.arr}` : `Viridis ${b.arr}`;
+    const sel = sens === "aller" && cible != null && b.m === cible;
+    return `<div class="bus${missed ? " missed" : ""}${sel ? " sel" : ""}" data-m="${b.m}"><div class="h">${b.dep}</div><div class="in${!missed && delta < 30 && !quand ? " soon" : ""}">${inTxt}</div><div class="a">${a}</div></div>`;
+  }).join("");
+  box.scrollLeft = keepScroll;
+  majFleches();
+
+  if (sens === "aller" && first) {
+    const leave = first.m - nowMin - lead;
+    let cls = "ok", txt;
+    const hm = x => `${pad(Math.floor(((x % 1440) + 1440) % 1440 / 60))}:${pad(((x % 60) + 60) % 60)}`;
+    if (first.k > 0) txt = `Prochain car ${first.k === 1 ? "demain" : JC[(new Date().getDay() + first.k) % 7]} à ${first.dep}`;
+    else if (leave > 45) txt = `Pars à ${hm(first.m - lead)}`;
+    else if (leave > 5) txt = `Pars dans ${leave} min`;
+    else { cls = "hurry"; txt = leave <= 0 ? "Pars maintenant" : `Pars dans ${leave} min`; }
+    go.className = "go " + cls;
+    go.innerHTML = `<b>${txt}</b><span>${cible != null ? "car choisi" : "car"} de ${first.dep}, ${reglages.walk}+${reglages.margin} min</span>`;
+  } else if (sens === "retour") {
+    const today = BUS.jours[iso(new Date())];
+    const last = today && today.retour.length ? today.retour[today.retour.length - 1] : null;
+    go.className = "go ok";
+    go.innerHTML = last ? `<b>Dernier car ${last[0]}</b><span>Viridis ${last[1]}</span>` : `<b>Pas de retour aujourd'hui</b>`;
+  } else { go.className = ""; go.innerHTML = ""; }
+}
+
+// ---------- météo ----------
+const VARS_H = ["temperature_2m", "apparent_temperature", "precipitation", "precipitation_probability",
+                "weather_code", "wind_gusts_10m", "snowfall", "uv_index", "visibility"];
+const VARS_D = ["sunrise", "sunset", "uv_index_max"];
+let AIR = null, LAST = null;
+
+async function fetchModels(modeles) {
+  const p = new URLSearchParams({
+    latitude: CFG.lieux.map(l => l.lat).join(","), longitude: CFG.lieux.map(l => l.lon).join(","),
+    hourly: VARS_H.join(","), daily: VARS_D.join(","),
+    models: modeles.join(","), timezone: "Europe/Paris", forecast_days: "3"
+  });
+  const r = await fetch("https://api.open-meteo.com/v1/forecast?" + p, { cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  return { modeles, data: Array.isArray(j) ? j : [j] };
+}
+
+async function loadAir() {
+  try {
+    const p = new URLSearchParams({
+      latitude: CFG.lieux.map(l => l.lat).join(","), longitude: CFG.lieux.map(l => l.lon).join(","),
+      hourly: ["european_aqi", ...Object.keys(CFG.pollens)].join(","), timezone: "Europe/Paris", forecast_days: "3"
+    });
+    const r = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?" + p, { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    AIR = Array.isArray(j) ? j : [j];
+  } catch (e) { AIR = null; }
+  if (LAST) renderWx(LAST);
+}
+
+// ---------- Google Weather API ----------
+function googleCode(type) {
+  const t = String(type || "");
+  if (t.includes("THUNDER")) return 95;
+  if (t.includes("HAIL")) return 96;
+  if (t.includes("SNOW") || t.includes("FLURRIES")) return t.includes("HEAVY") ? 75 : 71;
+  if (t.includes("RAIN") || t.includes("SHOWER")) return t.includes("HEAVY") ? 65 : t.includes("LIGHT") ? 61 : 63;
+  if (t.includes("DRIZZLE")) return 51;
+  if (t.includes("FOG") || t.includes("HAZE")) return 45;
+  if (t === "CLEAR") return 0;
+  if (t === "MOSTLY_CLEAR") return 1;
+  if (t === "PARTLY_CLOUDY") return 2;
+  return 3;
+}
+
+async function fetchGoogleLieu(l) {
+  const out = []; let token = "";
+  for (let page = 0; page < 3; page++) {
+    const p = new URLSearchParams({ key: CFG.googleKey, "location.latitude": l.lat, "location.longitude": l.lon,
+                                    hours: "48", languageCode: "fr", unitsSystem: "METRIC" });
+    if (token) p.set("pageToken", token);
+    const r = await fetch("https://weather.googleapis.com/v1/forecast/hours:lookup?" + p, { cache: "no-store" });
+    if (!r.ok) throw new Error("Google HTTP " + r.status);
+    const j = await r.json();
+    (j.forecastHours || []).forEach(h => {
+      const d = h.displayDateTime || {};
+      if (d.year == null) return;
+      const t = `${d.year}-${pad(d.month)}-${pad(d.day)}T${pad(d.hours || 0)}:00`;
+      const pr = h.precipitation || {};
+      out.push([t, {
+        temperature_2m: h.temperature?.degrees, apparent_temperature: h.feelsLikeTemperature?.degrees,
+        precipitation: pr.qpf?.quantity, precipitation_probability: pr.probability?.percent,
+        weather_code: googleCode(h.weatherCondition?.type), wind_gusts_10m: h.wind?.gust?.value,
+        snowfall: (pr.probability?.type === "SNOW" && pr.qpf?.quantity) ? pr.qpf.quantity / 10 : 0,
+        uv_index: h.uvIndex, visibility: h.visibility?.distance != null ? h.visibility.distance * 1000 : null
+      }]);
+    });
+    token = j.nextPageToken; if (!token) break;
+  }
+  return out;
+}
+
+async function loadGoogle() {
+  if (!CFG.googleKey) return null;
+  const c = store.get("ggCache", null);
+  if (c && Date.now() - c.t < CFG.googleCacheMin * 60000) return c.data;
+  try {
+    const data = await Promise.all(CFG.lieux.map(fetchGoogleLieu));
+    store.set("ggCache", { t: Date.now(), data });
+    return data;
+  } catch (e) { return c ? c.data : null; }
+}
+
+// ajoute Google comme un modèle de plus, aligné sur la grille horaire d'Open-Meteo
+function fusionGoogle(res, gg) {
+  if (!gg || res.modeles.includes("google")) return res;
+  res.data.forEach((loc, li) => {
+    const idx = new Map(loc.hourly.time.map((t, j) => [t, j]));
+    VARS_H.forEach(v => { loc.hourly[`${v}_google`] = new Array(loc.hourly.time.length).fill(null); });
+    (gg[li] || []).forEach(([t, vals]) => {
+      const j = idx.get(t); if (j == null) return;
+      VARS_H.forEach(v => { if (vals[v] != null) loc.hourly[`${v}_google`][j] = vals[v]; });
+    });
+  });
+  if (res.modeles.length === 1) { // best_match seul : renommer ses clés pour garder la cohérence
+    res.data.forEach(loc => VARS_H.forEach(v => { if (loc.hourly[v]) loc.hourly[`${v}_best_match`] = loc.hourly[v]; }));
+    VARS_D.forEach(v => res.data.forEach(loc => { if (loc.daily[v]) loc.daily[`${v}_best_match`] = loc.daily[v]; }));
+  }
+  res.modeles = res.modeles.concat("google");
+  return res;
+}
+
+async function loadWx() {
+  const essais = [CFG.modeles, CFG.modeles.filter(m => m !== "meteoswiss_icon_seamless"),
+                  ["meteofrance_seamless", "ecmwf_ifs025", "icon_seamless"], ["best_match"]];
+  let res = null;
+  const ggP = loadGoogle();
+  for (const m of essais) { try { res = await fetchModels(m); break; } catch (e) {} }
+  const gg = await ggP;
+  if (res) { res.t = Date.now(); store.set("wxCache", res); }
+  else {
+    res = store.get("wxCache", null);
+    if (!res) { $("recap").innerHTML = `<div class="err">Météo injoignable, vérifie la connexion.</div>`; return; }
+  }
+  res = fusionGoogle(JSON.parse(JSON.stringify(res)), gg);
+  LAST = res; renderWx(res);
+}
+
+const pick = (obj, v, m, single) => obj[`${v}_${m}`] || (single ? obj[v] : null);
+
+function analyse(res, jour) {
+  const single = res.modeles.length === 1, h0 = res.data[0].hourly, hours = [], actifs = new Set();
+  for (let j = 0; j < h0.time.length; j++) {
+    const t = h0.time[j];
+    if (t.slice(0, 10) !== jour) continue;
+    const acc = { T: [], AT: [], P: [], PP: [], WC: [], G: [], S: [], UV: [], V: [] };
+    const pluieParModele = {};
+    res.data.forEach((loc, li) => res.modeles.forEach(m => {
+      const get = v => { const a = pick(loc.hourly, v, m, single); return a ? a[j] : null; };
+      const T = get("temperature_2m"); if (T == null) return;
+      actifs.add(m); acc.T.push(T);
+      const push = (k, v) => { const x = get(v); if (x != null) acc[k].push(x); return x; };
+      push("AT", "apparent_temperature"); push("PP", "precipitation_probability"); push("WC", "weather_code");
+      push("G", "wind_gusts_10m"); push("S", "snowfall"); push("UV", "uv_index"); push("V", "visibility");
+      const p = get("precipitation");
+      if (p != null) { acc.P.push({ v: p, m, li }); pluieParModele[m] = Math.max(pluieParModele[m] || 0, p); }
+    }));
+    if (!acc.T.length) continue;
+    const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+    const mx = (a, d = 0) => a.length ? Math.max(...a) : d;
+    const pMax = acc.P.reduce((b, x) => (x.v > b.v ? x : b), { v: 0, m: null, li: 0 });
+    hours.push({
+      hour: +t.slice(11, 13), tMean: mean(acc.T), tMin: Math.min(...acc.T), tMax: Math.max(...acc.T),
+      atMin: acc.AT.length ? Math.min(...acc.AT) : null, atMax: acc.AT.length ? Math.max(...acc.AT) : null,
+      p: pMax.v, pSrc: pMax.m, pLoc: pMax.li, pp: acc.PP.length ? mx(acc.PP) : null,
+      wc: acc.WC.length ? mx(acc.WC) : null, wcMin: acc.WC.length ? Math.min(...acc.WC) : null,
+      g: mx(acc.G), snow: mx(acc.S), uv: mx(acc.UV), vis: acc.V.length ? Math.min(...acc.V) : null,
+      wetModels: Object.keys(pluieParModele).filter(m => pluieParModele[m] >= CFG.seuilPluie)
+    });
+  }
+  const d0 = res.data[0].daily, di = d0.time.indexOf(jour);
+  let sunrise = null, sunset = null, uvMax = 0;
+  for (const m of res.modeles) {
+    const sr = pick(d0, "sunrise", m, single), ss = pick(d0, "sunset", m, single), uv = pick(d0, "uv_index_max", m, single);
+    if (!sunrise && sr && sr[di]) sunrise = sr[di];
+    if (!sunset && ss && ss[di]) sunset = ss[di];
+    if (uv && uv[di] != null) uvMax = Math.max(uvMax, uv[di]);
+  }
+  return { hours, sunrise, sunset, uvMax, actifs: [...actifs] };
+}
+
+function plages(hours, test) {
+  const out = []; let cur = null;
+  hours.forEach(h => {
+    if (!test(h)) return;
+    if (cur && h.hour === cur.fin + 1) { cur.fin = h.hour; cur.max = Math.max(cur.max, h.p); }
+    else { cur = { debut: h.hour, fin: h.hour, max: h.p }; out.push(cur); }
+  });
+  return out;
+}
+const plageTxt = p => p.debut === p.fin ? `vers ${p.debut}h` : `${p.debut}h-${p.fin + 1}h`;
+
+function renderWx(res) {
+  const now = new Date(), demain = now.getHours() >= CFG.bascule;
+  const dj = new Date(now); if (demain) dj.setDate(dj.getDate() + 1);
+  const jour = iso(dj), A = analyse(res, jour);
+  $("ggSrc").textContent = res.modeles.includes("google") ? " + Google" : "";
+  $("wxTitle").textContent = demain ? "Météo de demain" : "Météo du jour";
+  const age = Math.round((Date.now() - res.t) / 60000);
+  $("wxAge").textContent = age < 2 ? "à jour" : `il y a ${age} min`;
+
+  const H = A.hours.filter(h => h.hour >= CFG.heureDebut && h.hour <= CFG.heureFin);
+  if (!H.length) { $("recap").innerHTML = `<div class="err">Pas de données pour ce jour.</div>`; return; }
+  const srH = A.sunrise ? +A.sunrise.slice(11, 13) + (+A.sunrise.slice(14, 16)) / 60 : 7.5;
+  const ssH = A.sunset ? +A.sunset.slice(11, 13) + (+A.sunset.slice(14, 16)) / 60 : 17;
+  const jourH = A.hours.filter(h => h.hour + 0.5 >= srH && h.hour + 0.5 <= ssH);
+  const moy = jourH.length ? jourH.reduce((s, h) => s + h.tMean, 0) / jourH.length : H[0].tMean;
+  const tmin = Math.min(...H.map(h => h.tMin)), tmax = Math.max(...H.map(h => h.tMax));
+
+  const fromH = demain ? CFG.heureDebut : Math.max(CFG.heureDebut, now.getHours());
+  const reste = H.filter(h => h.hour >= fromH);
+  const mouille = h => h.p >= CFG.seuilPluie || (h.pp != null && h.pp >= CFG.seuilProba && h.p > 0);
+  const pl = plages(reste, mouille), pluie = pl.length > 0;
+  const neige = reste.some(h => h.snow > 0.05);
+  const wet = new Set(); reste.forEach(h => h.wetModels.forEach(m => wet.add(m)));
+
+  let why;
+  if (pluie) {
+    const pMax = reste.reduce((b, h) => (h.p > b.p ? h : b), reste[0]);
+    const qui = wet.size ? `${wet.size}/${A.actifs.length} modèles (${[...wet].map(m => CFG.noms[m] || m).join(", ")})` : "proba élevée";
+    why = `<b>Pluie ${pl.map(plageTxt).join(", ")}</b>, jusqu'à ${fr1(pMax.p)} mm/h · ${qui}`;
+  } else {
+    const pm = Math.max(0, ...reste.map(h => h.p));
+    why = (pm > 0 ? `Quelques gouttes au plus (${fr1(pm)} mm/h)` : "Sec") + ` · ${A.actifs.length} modèles d'accord`;
+  }
+
+  $("recap").innerHTML = `
+    <div class="recap">
+      <div class="umb${pluie ? "" : " no"}" aria-hidden="true">☂️</div>
+      <div class="big">${r0(moy)}°</div>
+      <div style="min-width:0">
+        <div class="verdict" style="color:${pluie ? "var(--rain)" : "var(--ok)"}">${pluie ? (neige ? "Parapluie, neige possible" : "Prends le parapluie") : "Pas de parapluie"}</div>
+        <div class="sub">moy. de jour · ${r0(tmin)}° à ${r0(tmax)}° · ☀︎ ${hfr(A.sunrise)}-${hfr(A.sunset)}</div>
+      </div>
+    </div>
+    <div class="why">${why}</div>`;
+
+  renderTimeline(H, srH, ssH, demain ? -1 : now.getHours() + now.getMinutes() / 60);
+  renderTips({ H, reste, pluie, srH, ssH, A, demain, pl, jour });
+  majLapin({ H, reste, pluie, tmax });
+}
+
+function renderTimeline(H, srH, ssH, nowH) {
+  const W = 360, Ht = 128, padL = 12, padR = 12, emY = 13, top = 34, chartH = 46, rainTop = 88, rainH = 20;
+  const x0 = H[0].hour, x1 = H[H.length - 1].hour;
+  const X = h => padL + (h - x0) / Math.max(1, x1 - x0) * (W - padL - padR);
+  const lo = Math.floor(Math.min(...H.map(h => h.tMin))), hi = Math.ceil(Math.max(...H.map(h => h.tMax)));
+  const Y = t => top + (hi - t) / Math.max(1, hi - lo) * chartH;
+  const pScale = Math.max(2, ...H.map(h => h.p));
+  let band = H.map((h, i) => `${i ? "L" : "M"}${X(h.hour).toFixed(1)},${Y(h.tMax).toFixed(1)}`).join("");
+  band += H.slice().reverse().map(h => `L${X(h.hour).toFixed(1)},${Y(h.tMin).toFixed(1)}`).join("") + "Z";
+  const line = H.map((h, i) => `${i ? "L" : "M"}${X(h.hour).toFixed(1)},${Y(h.tMean).toFixed(1)}`).join("");
+  const bw = (W - padL - padR) / H.length * 0.6;
+  const bars = H.map(h => {
+    if (h.p <= 0) return "";
+    const bh = Math.max(2, h.p / pScale * rainH);
+    const col = h.p >= CFG.seuilPluie ? "var(--rain)" : "color-mix(in srgb,var(--rain) 40%,transparent)";
+    return `<rect x="${(X(h.hour) - bw / 2).toFixed(1)}" y="${(rainTop + rainH - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="${col}"/>`;
+  }).join("");
+  const night = [];
+  if (srH > x0) night.push(`<rect x="0" y="0" width="${X(Math.min(srH, x1))}" height="${rainTop + rainH}" fill="var(--night)"/>`);
+  if (ssH < x1) night.push(`<rect x="${X(ssH)}" y="0" width="${W - X(ssH)}" height="${rainTop + rainH}" fill="var(--night)"/>`);
+  const em = H.filter(h => h.hour % 2 === 0).map(h => {
+    const nuit = h.hour + 0.5 < srH || h.hour + 0.5 > ssH;
+    return `<text class="em" x="${X(h.hour)}" y="${emY}" text-anchor="middle">${wxEmoji(h.wc, nuit)}</text>`;
+  }).join("");
+  const labels = H.filter(h => h.hour % 3 === 0).map(h =>
+    `<text class="tl" x="${X(h.hour)}" y="${Y(h.tMax) - 4}" text-anchor="middle">${r0(h.tMean)}°</text>
+     <text x="${X(h.hour)}" y="${Ht - 3}" text-anchor="middle">${h.hour}h</text>`).join("");
+  const rainLab = H.filter(h => h.p >= CFG.seuilPluie && h.p === Math.max(...H.map(x => x.p))).slice(0, 1)
+    .map(h => `<text x="${X(h.hour)}" y="${rainTop + rainH - Math.max(2, h.p / pScale * rainH) - 2}" text-anchor="middle" style="fill:var(--rain)">${fr1(h.p)}</text>`).join("");
+  const nowLine = nowH >= x0 && nowH <= x1 ? `<line x1="${X(nowH)}" x2="${X(nowH)}" y1="18" y2="${rainTop + rainH}" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 3"/>` : "";
+  $("timeline").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Températures et pluie heure par heure">
+    ${night.join("")}${em}
+    <path d="${band}" fill="var(--band)"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${padL}" x2="${W - padR}" y1="${rainTop + rainH}" y2="${rainTop + rainH}" stroke="var(--line)"/>
+    ${bars}${rainLab}${labels}${nowLine}
+  </svg>`;
+}
+
+function tenue(t) {
+  if (t == null) return null;
+  if (t < -2) return ["🧤", `Manteau, bonnet, gants (ressenti ${r0(t)}°)`];
+  if (t < 4) return ["🧣", `Manteau chaud, écharpe (ressenti ${r0(t)}°)`];
+  if (t < 9) return ["🧥", `Manteau (ressenti ${r0(t)}°)`];
+  if (t < 14) return ["🧥", `Veste mi-saison (ressenti ${r0(t)}°)`];
+  if (t < 19) return ["👕", `Pull léger (ressenti ${r0(t)}°)`];
+  if (t < 25) return ["👕", `T-shirt (ressenti ${r0(t)}°)`];
+  return ["👕", `Tenue légère et claire (ressenti ${r0(t)}°)`];
+}
+
+function renderTips({ H, reste, pluie, srH, ssH, A, demain, pl, jour }) {
+  // [priorité, icône, texte, large]
+  const T = [], add = (p, i, t, w) => T.push([p, i, t, w]);
+  const tmin = Math.min(...H.map(h => h.tMin)), tmax = Math.max(...H.map(h => h.tMax));
+  const midi = H.filter(h => h.hour >= 11 && h.hour <= 16);
+  const rafales = Math.max(0, ...reste.map(h => h.g));
+
+  // alertes fortes
+  if (reste.some(h => h.wc >= 95)) {
+    const o = plages(reste, h => h.wc >= 95);
+    add(1, "⛈️", `Orage possible ${o.map(plageTxt).join(", ")}`, true);
+  }
+  const froid = H.filter(h => h.hour <= 10 && h.tMin <= 1);
+  if (froid.length) {
+    const humide = froid.some(h => h.p > 0 || h.snow > 0);
+    add(1, "🧊", humide ? "Verglas probable le matin" : `Gel le matin (${r0(Math.min(...froid.map(h => h.tMin)))}°)`);
+  }
+  const sn = reste.reduce((s, h) => s + h.snow, 0);
+  if (sn > 0.1) add(1, "❄️", `Neige, jusqu'à ${fr1(sn)} cm`);
+  const brume = H.filter(h => h.hour >= 6 && h.hour <= 10 && ((h.vis != null && h.vis < 1000) || h.wc === 45 || h.wc === 48));
+  if (brume.length) add(2, "🌫️", "Brouillard le matin, sois visible");
+  if (tmax >= 33) add(1, "🥵", `Canicule (${r0(tmax)}°), gourde, ombre, vêtements clairs`, true);
+  else if (tmax >= 28) add(2, "💧", `Chaud (${r0(tmax)}°), prends une gourde`);
+  if (rafales >= CFG.seuilRafales) add(2, "💨", pluie ? `Rafales ${r0(rafales)} km/h, plutôt une capuche` : `Rafales ${r0(rafales)} km/h`);
+
+  // tenue
+  const matin = H.filter(h => h.hour >= 7 && h.hour <= 9 && h.atMin != null);
+  const ressenti = (demain || new Date().getHours() < 10) && matin.length
+    ? Math.min(...matin.map(h => h.atMin)) : Math.min(...reste.filter(h => h.atMin != null).map(h => h.atMin));
+  const tn = tenue(isFinite(ressenti) ? ressenti : null); if (tn) add(3, tn[0], tn[1]);
+  if (tmax - tmin >= 8) add(4, "🌡️", `${r0(tmax - tmin)}° d'écart, en couches`);
+
+  // soleil
+  const ensoleille = midi.length && midi.filter(h => h.wcMin != null && h.wcMin <= 2).length >= Math.ceil(midi.length / 2);
+  const uv = A.uvMax;
+  if (uv >= 6) add(2, "🧴", `UV ${r0(uv)}, crème solaire`);
+  if (uv >= 3 && ensoleille) add(3, "🕶️", "Lunettes de soleil");
+  if ((uv >= 5 || tmax >= 25) && ensoleille) add(3, "🧢", "Casquette");
+
+  // retour, nuit
+  const soir = pl.filter(p => p.fin >= 16 && p.debut <= 20);
+  if (soir.length && !demain) add(3, "🌆", `Pluie au retour (${soir.map(plageTxt).join(", ")})`);
+  if (ssH < 17.75) add(5, "🔦", `Nuit à ${hfr(A.sunset)}, sois visible`);
+
+  // air et pollens (sur la plage de jour, pire des deux lieux)
+  if (AIR) {
+    let aqi = 0; const pol = {};
+    AIR.forEach(loc => {
+      const h = loc.hourly; if (!h || !h.time) return;
+      h.time.forEach((t, j) => {
+        if (t.slice(0, 10) !== jour) return;
+        const hr = +t.slice(11, 13); if (hr < 7 || hr > 21) return;
+        if (h.european_aqi && h.european_aqi[j] != null) aqi = Math.max(aqi, h.european_aqi[j]);
+        for (const k in CFG.pollens) if (h[k] && h[k][j] != null) pol[k] = Math.max(pol[k] || 0, h[k][j]);
+      });
+    });
+    const hauts = Object.keys(pol).filter(k => pol[k] >= CFG.pollens[k][0]).map(k => CFG.pollens[k][1]);
+    if (hauts.length) add(2, "🤧", `Pollens élevés : ${hauts.join(", ")}`, hauts.length > 1);
+    if (aqi >= 80) add(2, "😷", `Air mauvais (indice ${r0(aqi)}), évite l'effort dehors`, true);
+    else if (aqi >= 60) add(4, "🌁", `Air médiocre (indice ${r0(aqi)})`);
+  }
+
+  // modèles, bus
+  const spread = H.reduce((s, h) => s + (h.tMax - h.tMin), 0) / H.length;
+  if (spread >= 4) add(4, "🤔", "Modèles en désaccord");
+  if (BUS && !demain) {
+    const j = BUS.jours[iso(new Date())];
+    if (j && !j.aller.length && !j.retour.length) add(1, "🚫", "Pas de car 230 aujourd'hui");
+  }
+
+  T.sort((a, b) => a[0] - b[0]);
+  // place limitée : une ligne large compte double
+  let place = CFG.maxConseils; const vus = [];
+  for (const t of T) { const c = t[3] ? 2 : 1; if (place - c < 0) continue; place -= c; vus.push(t); }
+  vus.sort((a, b) => (a[3] ? 0 : 1) - (b[3] ? 0 : 1) || a[0] - b[0]);
+  $("tipsCard").hidden = !vus.length;
+  $("tips").innerHTML = vus.map(([, i, t, w]) => `<li${w ? ' class="w"' : ""}><span class="i">${i}</span><span>${t}</span></li>`).join("");
+}
+
+// ---------- lapin évolutif ----------
+function lapinFx(kind) {
+  const g = $("fx"); g.innerHTML = ""; if (!kind) return;
+  const N = { rain: 10, snow: 9, zzz: 3 }[kind], NS = "http://www.w3.org/2000/svg";
+  for (let i = 0; i < N; i++) {
+    const e = document.createElementNS(NS, kind === "rain" ? "line" : kind === "snow" ? "circle" : "text");
+    if (kind === "rain") { const x = -10 + i * 14 + Math.random() * 6; e.setAttribute("x1", x); e.setAttribute("x2", x - 2); e.setAttribute("y1", -8); e.setAttribute("y2", 2); }
+    else if (kind === "snow") { e.setAttribute("cx", -12 + i * 16 + Math.random() * 8); e.setAttribute("cy", -8); e.setAttribute("r", 1.8 + Math.random()); }
+    else { e.textContent = "z"; e.setAttribute("x", 88 + i * 6); e.setAttribute("y", 20); }
+    e.setAttribute("class", "f-" + kind);
+    e.style.animationDuration = (kind === "rain" ? .7 + Math.random() * .4 : kind === "snow" ? 3 + Math.random() * 2 : 3.2) + "s";
+    e.style.animationDelay = (kind === "zzz" ? i * 1.05 : -Math.random() * 3) + "s";
+    g.appendChild(e);
+  }
+}
+function appliquerLapin(T, cls, fx) {
+  const b = $("bunny"); T = new Set(T);
+  b.querySelectorAll("[data-a]").forEach(e => { e.style.display = T.has(e.dataset.a) ? "inline" : ""; });
+  b.setAttribute("class", "bunny" + (cls ? " " + cls : ""));
+  lapinFx(fx);
+}
+function majLapin({ H, reste, pluie, tmax }) {
+  const now = new Date(), hr = now.getHours() + now.getMinutes() / 60;
+  const g = Math.max(0, ...reste.map(h => h.g)), p = Math.max(0, ...reste.map(h => h.p));
+  const ats = reste.filter(h => h.atMin != null).map(h => h.atMin), res = ats.length ? Math.min(...ats) : 10;
+  const midi = H.filter(h => h.hour >= 11 && h.hour <= 16);
+  const sun = midi.length && midi.filter(h => h.wcMin != null && h.wcMin <= 2).length >= Math.ceil(midi.length / 2);
+  if (hr >= 22 || hr < 5.5) return appliquerLapin(["sleep", "beanie", "shut"], "sleep", "zzz");
+  if (reste.some(h => h.snow > 0.05)) return appliquerLapin(["beanie", "scarf"], "cold", "snow");
+  if (pluie) return appliquerLapin([p >= 1 || g >= 40 || reste.some(h => h.wc >= 95) ? "poncho" : "umbrella"], "", "rain");
+  if (sun && tmax >= 20) return appliquerLapin(["chair", "shades"], "calm", null);
+  const T = []; if (sun) T.push("shades");
+  if (res < 4) T.push("beanie", "scarf"); else if (res < 9) T.push("scarf");
+  appliquerLapin(T, res < 1 ? "cold" : "", null);
+}
+
+// ---------- interactions ----------
+$("tAller").onclick = () => { sens = "aller"; $("buses").scrollLeft = 0; renderBus(); };
+$("tRetour").onclick = () => { sens = "retour"; $("buses").scrollLeft = 0; renderBus(); };
+function majFleches() {
+  const b = $("buses"), n = b.querySelectorAll(".bus").length, pages = Math.max(1, Math.ceil(n / 3));
+  const page = Math.round(b.scrollLeft / Math.max(1, b.clientWidth));
+  $("prev").disabled = b.scrollLeft < 4;
+  $("next").disabled = b.scrollLeft + b.clientWidth >= b.scrollWidth - 4;
+  $("dots").innerHTML = pages > 1 ? Array.from({ length: pages }, (_, i) => `<i class="${i === page ? "on" : ""}"></i>`).join("") : "";
+}
+$("prev").onclick = () => $("buses").scrollBy({ left: -$("buses").clientWidth, behavior: "smooth" });
+$("next").onclick = () => $("buses").scrollBy({ left: $("buses").clientWidth, behavior: "smooth" });
+$("buses").addEventListener("scroll", () => requestAnimationFrame(majFleches), { passive: true });
+// toucher un bus : le bandeau « Pars dans » le prend pour cible ; re-toucher pour revenir au prochain
+$("buses").addEventListener("click", e => {
+  const el = e.target.closest(".bus"); if (!el || sens !== "aller" || el.classList.contains("missed")) return;
+  const m = +el.dataset.m; cible = cible === m ? null : m; renderBus();
+});
+$("gear").onclick = () => $("settings").classList.toggle("open");
+$("walk").value = reglages.walk; $("margin").value = reglages.margin;
+$("walk").oninput = e => { reglages.walk = Math.max(0, +e.target.value || 0); store.set("walk", reglages.walk); renderBus(); };
+$("margin").oninput = e => { reglages.margin = Math.max(0, +e.target.value || 0); store.set("margin", reglages.margin); renderBus(); };
+
+$("bunny").addEventListener("click", () => {
+  const b = $("bunny"); b.classList.remove("boing"); void b.getBoundingClientRect(); b.classList.add("boing");
+});
+$("bunny").addEventListener("animationend", e => { if (e.animationName === "boing") $("bunny").classList.remove("boing"); });
+
+tickClock(); loadBus(); loadWx(); loadAir();
+setInterval(() => { tickClock(); renderBus(); }, 20000);
+setInterval(() => { loadWx(); loadAir(); }, 10 * 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { tickClock(); renderBus(); loadWx(); loadAir(); } });
+</script>
+</body>
+</html>
